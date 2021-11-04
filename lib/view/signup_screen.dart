@@ -1,6 +1,10 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:job_app/model/user_model.dart';
+import 'package:job_app/providers/auth/auth_provider.dart';
+import 'package:job_app/providers/user/user_provider.dart';
 import 'package:job_app/theme.dart';
+import 'package:provider/provider.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -15,8 +19,18 @@ class _SignupScreenState extends State<SignupScreen> {
   TextEditingController passwordController = TextEditingController(text: '');
   TextEditingController goalController = TextEditingController(text: '');
 
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
+    void showError(String message) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(backgroundColor: Colors.red, content: Text(message)));
+    }
+
+    var authProvider = Provider.of<AuthProvider>(context);
+    var userProvider = Provider.of<UserProvider>(context);
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -99,8 +113,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       : redTextStyle,
                 ),
                 SizedBox(height: 20.0),
-                Text('Password',
-                    style: greyTextStyle.copyWith(fontSize: 16.0)),
+                Text('Password', style: greyTextStyle.copyWith(fontSize: 16.0)),
                 SizedBox(height: 8.0),
                 TextFormField(
                   obscureText: true,
@@ -154,9 +167,33 @@ class _SignupScreenState extends State<SignupScreen> {
                   width: double.infinity,
                   height: 50.0,
                   margin: EdgeInsets.only(bottom: 15.0),
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                  child: isLoading ? Center(child: CircularProgressIndicator()) : TextButton(
+                    onPressed: () async {
+                      if (nameController.text.isEmpty ||
+                          emailController.text.isEmpty ||
+                          passwordController.text.isEmpty ||
+                          goalController.text.isEmpty) {
+                        showError('Data must not empty');
+                      } else {
+                        setState(() {
+                        isLoading = true;
+                        });
+                        UserModel user = await authProvider.register(
+                            emailController.text,
+                            passwordController.text,
+                            nameController.text,
+                            goalController.text);
+                        setState(() {
+                          isLoading = false;
+                        });
+                        if (user == null) {
+                          showError('Wrong data');
+                        } else {
+                          userProvider.user = user;
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, '/home', (route) => false);
+                        }
+                      }
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: primaryColor,

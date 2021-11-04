@@ -1,9 +1,3 @@
-/// id : "Kka5AR3XLbgWYhQsGtTI"
-/// name : "Disi Kharisma"
-/// email : "disi.kharisma@gmail.com"
-/// password : "123456"
-/// goal : "Pro Women in Tech"
-
 class UserModel {
   String? id;
   String? name;

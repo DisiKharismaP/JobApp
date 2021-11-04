@@ -101,7 +101,7 @@ class _SigninScreenState extends State<SigninScreen> {
                   height: 50.0,
                   margin: EdgeInsets.only(bottom: 15.0),
                   child: TextButton(
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
                     },
                     style: TextButton.styleFrom(
